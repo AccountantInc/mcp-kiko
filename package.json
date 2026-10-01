@@ -6,7 +6,11 @@
     "author": "Advisor8 Inc (https://kikobooks.com)",
     "repository": {
         "type": "git",
-        "url": "git://github.com/Advisor8inc/kikobooks-mcp-server.git"
+        "url": "git+https://github.com/AccountantInc/mcp-kiko.git"
+    },
+    "homepage": "https://github.com/AccountantInc/mcp-kiko#readme",
+    "bugs": {
+        "url": "https://github.com/AccountantInc/mcp-kiko/issues"
     },
     "main": "dist/index.js",
     "type": "module",
@@ -20,6 +24,8 @@
         "watch": "tsc --watch",
         "lint:fix": "eslint --fix",
         "lint": "eslint .",
+        "verify": "npm run build && node scripts/verify-tools.mjs",
+        "smoke": "npm run build && node scripts/smoke.mjs",
         "dev": "node --loader ts-node/esm src/index.ts"
     },
     "dependencies": {
