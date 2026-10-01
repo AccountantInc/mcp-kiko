@@ -16,6 +16,15 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for [K
 - **Customer Payments** — Search, create, and manage AR payments
 - **Credit Memos** — Search, create, and manage AR credit memos
 - **Sales Receipts** — Search, create, and manage sales receipts
+- **CRM** — Leads, deals, and pipeline (search/create/update), plus stage moves and customer promotion
+- **Proposals** — Search and copy proposals; convert accepted proposals to invoices or jobs
+- **Workflow** — Jobs (Projects/Engagements) and tasks; status updates and job-to-invoice billing
+- **Lifecycle bridges** — CRM deal → proposal → job → invoice, end to end
+- **Connection & discovery** — Connection status and per-org enabled-module discovery (no secrets exposed)
+
+> CRM, Proposals, and Workflow tools require the org to have the Sales / Workflow
+> modules enabled (always on for accounting firms; opt-in for self-service
+> businesses). Call `get_enabled_modules` first to check.
 
 ## Prerequisites
 
@@ -100,7 +109,7 @@ For local development, point to the built output:
 }
 ```
 
-## Available Tools (50 total)
+## Available Tools (73 total)
 
 ### Chart of Accounts
 | Tool | Description |
@@ -200,6 +209,55 @@ For local development, point to the built output:
 | `get_sales_receipt` | Get full sales receipt details |
 | `create_sales_receipt` | Create a new sales receipt |
 
+### CRM (requires the Sales module)
+| Tool | Description |
+|------|-------------|
+| `search_leads` | Search CRM leads |
+| `get_lead` | Get a lead by ID |
+| `create_lead` | Create a new lead |
+| `search_deals` | Search CRM deals (pipeline opportunities) |
+| `get_deal` | Get a deal by ID |
+| `create_deal` | Create a new deal from a lead |
+| `update_deal` | Update an existing deal |
+| `get_pipeline` | Get the pipeline with stages and per-stage deal counts |
+| `move_deal_stage` | Move a deal to another pipeline stage |
+| `promote_deal_to_customer` | Promote a deal's customer (gate before proposal/job) |
+
+### Proposals (requires the Sales module)
+| Tool | Description |
+|------|-------------|
+| `search_proposals` | Search proposals by customer, status, date |
+| `get_proposal` | Get full proposal details |
+| `copy_proposal` | Duplicate a proposal into a new draft |
+| `generate_invoice_from_proposal` | Create a DRAFT invoice from a signed proposal (bridge) |
+| `create_job_from_proposal` | Create a job with tasks from an accepted proposal (bridge) |
+
+### Workflow (requires the Workflow module)
+| Tool | Description |
+|------|-------------|
+| `search_jobs` | Search jobs (Projects for CB / Engagements for CA) |
+| `get_job` | Get full job details |
+| `list_job_tasks` | List the tasks for a job |
+| `update_job_status` | Update a job's status |
+| `update_task_status` | Update a task's status (e.g. mark complete) |
+| `generate_invoice_from_job` | Create a DRAFT invoice from a job's timesheets + expenses (bridge) |
+
+### Connection & Discovery
+| Tool | Description |
+|------|-------------|
+| `get_connection_status` | Report connected / unauthenticated / disconnected — never returns secrets |
+| `get_enabled_modules` | List which modules (Sales, Workflow) the org has enabled |
+
+### Scope tiers
+Read tools (`get_*`, `search_*`) always load. Mutating tools are grouped into
+scope tiers that can be suppressed at startup:
+
+| Env flag | Suppresses |
+|----------|------------|
+| `KIKOBOOKS_DISABLE_WRITE` | `create_*`, `post_*`, `reverse_*`, `move_*`, `promote_*`, `copy_*`, `generate_*` |
+| `KIKOBOOKS_DISABLE_UPDATE` | `update_*` |
+| `KIKOBOOKS_DISABLE_DELETE` | `delete_*`, `void_*` |
+
 ## Authentication
 
 The server supports two authentication methods:
@@ -215,10 +273,13 @@ Set `KIKOBOOKS_ACCESS_TOKEN` (and optionally `KIKOBOOKS_REFRESH_TOKEN`) if you m
 | Variable | Required | Description |
 |----------|----------|-------------|
 | `KIKOBOOKS_BASE_URL` | Yes | KikoBooks API base URL |
-| `KIKOBOOKS_API_KEY` | Yes* | API key for authentication |
+| `KIKOBOOKS_API_KEY` | Yes* | Org API key for authentication |
 | `KIKOBOOKS_ACCESS_TOKEN` | Alt* | Direct JWT access token |
 | `KIKOBOOKS_REFRESH_TOKEN` | No | JWT refresh token |
-| `KIKOBOOKS_ENVIRONMENT` | No | `sandbox` or `production` |
+| `KIKOBOOKS_TOKEN_STORE_PATH` | No | Absolute path to persist the rotated JWT between runs (API key is never written) |
+| `KIKOBOOKS_DISABLE_WRITE` | No | Suppress create/post/bridge tools |
+| `KIKOBOOKS_DISABLE_UPDATE` | No | Suppress update tools |
+| `KIKOBOOKS_DISABLE_DELETE` | No | Suppress delete/void tools |
 
 \* Either `KIKOBOOKS_API_KEY` or `KIKOBOOKS_ACCESS_TOKEN` is required.
 
@@ -242,36 +303,29 @@ npm run lint
 
 ```
 src/
-├── index.ts                 # Entry point — registers all 50 tools
+├── index.ts                 # Entry point
+├── config.ts                # Env config (base URL, key, token-store path, scope flags)
 ├── clients/
-│   └── kikobooks-client.ts  # HTTP client with JWT auth (get/post/put/delete)
+│   ├── kikobooks-client.ts   # HTTP client with JWT auth + auto-refresh (get/post/put/delete)
+│   └── token-store.ts        # Optional file-backed JWT cache (API key never persisted)
 ├── server/
 │   └── kikobooks-mcp-server.ts  # MCP server singleton
-├── tools/                   # Tool definitions (schema + handler glue)
-│   ├── search-accounts.tool.ts
-│   ├── create-invoice.tool.ts
-│   ├── delete-customer.tool.ts
-│   └── ... (50 files)
-├── handlers/                # Business logic (calls API client)
-│   ├── search-kikobooks-accounts.handler.ts
-│   ├── create-kikobooks-invoice.handler.ts
-│   ├── delete-kikobooks-customer.handler.ts
-│   └── ... (50 files)
-├── helpers/                 # Utilities
-│   ├── register-tool.ts
-│   └── format-error.ts
-└── types/                   # TypeScript types
-    ├── tool-definition.ts
-    └── tool-response.ts
+├── tools/                   # Tool definitions grouped by verb, registered via tool-factory
+│   ├── tool-factory.ts       # Registers all tools + applies scope-tier gating
+│   ├── search/  get/  create/  update/  delete/  action/
+│   └── ... (73 tools)
+├── handlers/                # Business logic (calls the API client)
+├── helpers/                 # register-tool, format-error, get-package-version
+└── types/                   # tool-definition, tool-response
 ```
 
 ## Roadmap
 
 See [ROADMAP.md](ROADMAP.md) for the full implementation plan:
-- **Phase 1** ✅ Core Bookkeeping (50 tools across 12 entities)
-- **Phase 2** Banking & Reconciliation
-- **Phase 3** Reports & Analytics
-- **Phase 4** Advanced Features
+- **Phase 1** ✅ Core Bookkeeping (12 accounting entities)
+- **Phase 2** ✅ Practice Management (CRM, Proposals, Workflow) + lifecycle bridges
+- **Phase 3** Banking & Reconciliation
+- **Phase 4** Reports & Analytics
 
 ## License
 

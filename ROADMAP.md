@@ -91,6 +91,22 @@ This is **your public/external MCP server** for third-party AI integrations.
 
 **Phase 1 Total: 50 tools across 12 entities**
 
+### Phase 1.5 — Practice Management ✅ (COMPLETE)
+*CRM, Proposals, and Workflow, with lifecycle bridges. Capability-gated:
+these require the org's Sales / Workflow modules (always on for accounting
+firms; opt-in for self-service businesses) — agents call `get_enabled_modules`
+first.*
+
+| Area | Tools | KikoBooks API Endpoints |
+|------|-------|------------------------|
+| **CRM** | `search_leads`, `get_lead`, `create_lead`, `search_deals`, `get_deal`, `create_deal`, `update_deal`, `get_pipeline`, `move_deal_stage`, `promote_deal_to_customer` | `/api/Crm/*` |
+| **Proposals** | `search_proposals`, `get_proposal`, `copy_proposal`, `generate_invoice_from_proposal`, `create_job_from_proposal` | `/api/AC_SP_Proposal/*` |
+| **Workflow** | `search_jobs`, `get_job`, `list_job_tasks`, `update_job_status`, `update_task_status`, `generate_invoice_from_job` | `/api/AC_SP_Jobs/*`, `/api/AC_SP_Job_Tasks/*` |
+| **Connection & discovery** | `get_connection_status`, `get_enabled_modules` | `/api/AuthorizationBackbone/runtime` |
+
+**Lifecycle bridges:** CRM deal → proposal → job → invoice, end to end.
+**Running total: 73 tools.**
+
 ### Phase 2 — Banking & Reconciliation (planned)
 
 | Entity | Tools |
@@ -245,6 +261,7 @@ Once published, users will configure it like this:
 |-------|-------|-------|
 | **Phase 0** ✅ | Project scaffold, client, auth, server setup | 0 |
 | **Phase 1** ✅ | Core Bookkeeping (12 entities: Accounts, Customers, Vendors, Items, Invoices, Bills, Journal Entries, Bill Payments, Purchases, Payments, Credit Memos, Sales Receipts) | 50 |
+| **Phase 1.5** ✅ | Practice Management (CRM, Proposals, Workflow) + lifecycle bridges + capability/connection tools | 23 |
 | **Phase 2** | Banking (Bank Accounts, Transactions, Reconciliation) | TBD |
 | **Phase 3** | Reports (P&L, Balance Sheet, Trial Balance, Aging) | TBD |
 | **Phase 4** | Advanced (Fixed Assets, Recurring, Org Details) | TBD |
