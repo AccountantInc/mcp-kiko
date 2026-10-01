@@ -19,6 +19,7 @@ const WRITE_PREFIXES = [
     "send_",
     "generate_",
     "approve_",
+    "copy_",
 ];
 const UPDATE_PREFIXES = ["update_"];
 const DELETE_PREFIXES = ["delete_", "void_"];

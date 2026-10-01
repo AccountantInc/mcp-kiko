@@ -6,6 +6,8 @@ import { MoveDealStageTool } from "./move-deal-stage.tool.js";
 import { PromoteDealToCustomerTool } from "./promote-deal-to-customer.tool.js";
 import { GenerateInvoiceFromProposalTool } from "./generate-invoice-from-proposal.tool.js";
 import { GenerateInvoiceFromJobTool } from "./generate-invoice-from-job.tool.js";
+import { CopyProposalTool } from "./copy-proposal.tool.js";
+import { CreateJobFromProposalTool } from "./create-job-from-proposal.tool.js";
 
 export const ActionTools = [
     PostJournalEntryTool,
@@ -16,4 +18,6 @@ export const ActionTools = [
     PromoteDealToCustomerTool,
     GenerateInvoiceFromProposalTool,
     GenerateInvoiceFromJobTool,
+    CopyProposalTool,
+    CreateJobFromProposalTool,
 ];
