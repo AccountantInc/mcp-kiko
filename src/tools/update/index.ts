@@ -6,6 +6,8 @@ import { UpdateItemTool } from "./update-item.tool.js";
 import { UpdatePurchaseTool } from "./update-purchase.tool.js";
 import { UpdateVendorTool } from "./update-vendor.tool.js";
 import { UpdateDealTool } from "./update-deal.tool.js";
+import { UpdateJobStatusTool } from "./update-job-status.tool.js";
+import { UpdateTaskStatusTool } from "./update-task-status.tool.js";
 
 export const UpdateTools = [
     UpdateAccountTool,
@@ -16,4 +18,6 @@ export const UpdateTools = [
     UpdatePurchaseTool,
     UpdateVendorTool,
     UpdateDealTool,
+    UpdateJobStatusTool,
+    UpdateTaskStatusTool,
 ];
