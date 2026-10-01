@@ -15,6 +15,7 @@ import { GetEnabledModulesTool } from "./get-enabled-modules.tool.js";
 import { GetLeadTool } from "./get-lead.tool.js";
 import { GetDealTool } from "./get-deal.tool.js";
 import { GetPipelineTool } from "./get-pipeline.tool.js";
+import { GetProposalTool } from "./get-proposal.tool.js";
 
 export const GetTools = [
     GetAccountTool,
@@ -34,4 +35,5 @@ export const GetTools = [
     GetLeadTool,
     GetDealTool,
     GetPipelineTool,
+    GetProposalTool,
 ];

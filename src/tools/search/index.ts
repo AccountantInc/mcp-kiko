@@ -12,6 +12,7 @@ import { SearchSalesReceiptsTool } from "./search-sales-receipts.tool.js";
 import { SearchVendorsTool } from "./search-vendors.tool.js";
 import { SearchLeadsTool } from "./search-leads.tool.js";
 import { SearchDealsTool } from "./search-deals.tool.js";
+import { SearchProposalsTool } from "./search-proposals.tool.js";
 
 export const SearchTools = [
     SearchAccountsTool,
@@ -28,4 +29,5 @@ export const SearchTools = [
     SearchVendorsTool,
     SearchLeadsTool,
     SearchDealsTool,
+    SearchProposalsTool,
 ];

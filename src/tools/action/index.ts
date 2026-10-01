@@ -4,6 +4,7 @@ import { VoidBillPaymentTool } from "./void-bill-payment.tool.js";
 import { VoidBillTool } from "./void-bill.tool.js";
 import { MoveDealStageTool } from "./move-deal-stage.tool.js";
 import { PromoteDealToCustomerTool } from "./promote-deal-to-customer.tool.js";
+import { GenerateInvoiceFromProposalTool } from "./generate-invoice-from-proposal.tool.js";
 
 export const ActionTools = [
     PostJournalEntryTool,
@@ -12,4 +13,5 @@ export const ActionTools = [
     VoidBillTool,
     MoveDealStageTool,
     PromoteDealToCustomerTool,
+    GenerateInvoiceFromProposalTool,
 ];
