@@ -10,6 +10,8 @@ import { CreatePaymentTool } from "./create-payment.tool.js";
 import { CreatePurchaseTool } from "./create-purchase.tool.js";
 import { CreateSalesReceiptTool } from "./create-sales-receipt.tool.js";
 import { CreateVendorTool } from "./create-vendor.tool.js";
+import { CreateLeadTool } from "./create-lead.tool.js";
+import { CreateDealTool } from "./create-deal.tool.js";
 
 export const CreateTools = [
     CreateAccountTool,
@@ -24,4 +26,6 @@ export const CreateTools = [
     CreatePurchaseTool,
     CreateSalesReceiptTool,
     CreateVendorTool,
+    CreateLeadTool,
+    CreateDealTool,
 ];
