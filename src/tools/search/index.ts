@@ -10,6 +10,10 @@ import { SearchPaymentsTool } from "./search-payments.tool.js";
 import { SearchPurchasesTool } from "./search-purchases.tool.js";
 import { SearchSalesReceiptsTool } from "./search-sales-receipts.tool.js";
 import { SearchVendorsTool } from "./search-vendors.tool.js";
+import { SearchLeadsTool } from "./search-leads.tool.js";
+import { SearchDealsTool } from "./search-deals.tool.js";
+import { SearchProposalsTool } from "./search-proposals.tool.js";
+import { SearchJobsTool } from "./search-jobs.tool.js";
 
 export const SearchTools = [
     SearchAccountsTool,
@@ -24,4 +28,8 @@ export const SearchTools = [
     SearchPurchasesTool,
     SearchSalesReceiptsTool,
     SearchVendorsTool,
+    SearchLeadsTool,
+    SearchDealsTool,
+    SearchProposalsTool,
+    SearchJobsTool,
 ];
