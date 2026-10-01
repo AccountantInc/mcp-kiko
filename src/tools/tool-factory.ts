@@ -10,7 +10,16 @@ import { DeleteTools } from "./delete/index.js";
 import { ActionTools } from "./action/index.js";
 
 /** Mutating verb prefixes, grouped by the scope tier they require. */
-const WRITE_PREFIXES = ["create_", "post_", "reverse_"];
+const WRITE_PREFIXES = [
+    "create_",
+    "post_",
+    "reverse_",
+    "move_",
+    "promote_",
+    "send_",
+    "generate_",
+    "approve_",
+];
 const UPDATE_PREFIXES = ["update_"];
 const DELETE_PREFIXES = ["delete_", "void_"];
 

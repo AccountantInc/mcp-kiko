@@ -12,6 +12,9 @@ import { GetSalesReceiptTool } from "./get-sales-receipt.tool.js";
 import { GetVendorTool } from "./get-vendor.tool.js";
 import { GetConnectionStatusTool } from "./get-connection-status.tool.js";
 import { GetEnabledModulesTool } from "./get-enabled-modules.tool.js";
+import { GetLeadTool } from "./get-lead.tool.js";
+import { GetDealTool } from "./get-deal.tool.js";
+import { GetPipelineTool } from "./get-pipeline.tool.js";
 
 export const GetTools = [
     GetAccountTool,
@@ -28,4 +31,7 @@ export const GetTools = [
     GetVendorTool,
     GetConnectionStatusTool,
     GetEnabledModulesTool,
+    GetLeadTool,
+    GetDealTool,
+    GetPipelineTool,
 ];
