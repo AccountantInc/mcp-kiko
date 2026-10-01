@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches: [main, venu]
+  pull_request:
+    branches: [main, venu]
+
+jobs:
+  build-verify:
+    name: Build & verify tool catalog
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      # verify runs `npm run build` then asserts the tool catalog + scope-tier
+      # gating over stdio (no credentials needed). Hard-fails on drift.
+      - run: npm run verify
+
+  smoke:
+    name: Live smoke (E2E)
+    runs-on: ubuntu-latest
+    needs: build-verify
+    # Push-only: never run a live, data-touching smoke on PRs (incl. forks),
+    # where repo secrets are unavailable anyway.
+    if: ${{ github.event_name == 'push' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+      - run: npm ci
+      # smoke.mjs skips cleanly (exit 0) when KIKOBOOKS_API_KEY is unset, so this
+      # job stays green until the owner adds the repo secret — then it becomes a
+      # real read-only E2E against a live org. Catches route/auth drift.
+      - name: Live smoke (skips without KIKOBOOKS_API_KEY secret)
+        run: npm run smoke
+        env:
+          KIKOBOOKS_BASE_URL: ${{ secrets.KIKOBOOKS_BASE_URL }}
+          KIKOBOOKS_API_KEY: ${{ secrets.KIKOBOOKS_API_KEY }}
