@@ -2,6 +2,8 @@
 
 A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for [KikoBooks](https://kikobooks.com) — enterprise AI-agentic bookkeeping software. This server enables AI assistants like Claude, GitHub Copilot, and OpenAI-powered agents to interact with your KikoBooks accounting data through natural language.
 
+> **Building an agent on top of this server?** Read [SKILL.md](SKILL.md) — the operating guide (status-first connect, write-tier approval, read-back verification, never expose secrets).
+
 ## Features
 
 - **Chart of Accounts** — Search, get, create, and update GL accounts
