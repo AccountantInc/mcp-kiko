@@ -16,6 +16,8 @@ import { GetLeadTool } from "./get-lead.tool.js";
 import { GetDealTool } from "./get-deal.tool.js";
 import { GetPipelineTool } from "./get-pipeline.tool.js";
 import { GetProposalTool } from "./get-proposal.tool.js";
+import { GetJobTool } from "./get-job.tool.js";
+import { ListJobTasksTool } from "./list-job-tasks.tool.js";
 
 export const GetTools = [
     GetAccountTool,
@@ -36,4 +38,6 @@ export const GetTools = [
     GetDealTool,
     GetPipelineTool,
     GetProposalTool,
+    GetJobTool,
+    ListJobTasksTool,
 ];
