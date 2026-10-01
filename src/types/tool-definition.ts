@@ -1,9 +1,8 @@
-import { z } from "zod";
-import { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
+import { ToolCallback } from "@modelcontextprotocol/sdk/server/mcp.js";
 
-export interface ToolDefinition<T extends z.ZodType<any, any>> {
+export interface ToolDefinition {
     name: string;
     description: string;
-    schema: T;
-    handler: (args: z.infer<T>, extra: any) => Promise<CallToolResult>;
+    schema: Record<string, any>;
+    handler: ToolCallback<Record<string, any>>;
 }

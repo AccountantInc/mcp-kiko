@@ -1,6 +1,8 @@
 import { config } from "dotenv";
 config();
 
+import { getClientHeaders } from "../helpers/get-client-headers.js";
+
 interface AuthTokens {
     accessToken: string;
     refreshToken?: string;
@@ -180,7 +182,7 @@ class KikoBooksClient {
             headers: {
                 Authorization: `Bearer ${this.accessToken}`,
                 "Content-Type": "application/json",
-                "User-Agent": "kikobooks-mcp-server/0.1.0",
+                ...getClientHeaders(),
             },
         });
 
@@ -188,10 +190,11 @@ class KikoBooksClient {
             const error = new Error(`API request failed: ${path}`) as any;
             error.status = response.status;
             error.statusText = response.statusText;
+            const bodyText = await response.text();
             try {
-                error.body = await response.json();
+                error.body = JSON.parse(bodyText);
             } catch {
-                error.body = await response.text();
+                error.body = bodyText;
             }
             throw error;
         }
@@ -210,7 +213,7 @@ class KikoBooksClient {
             headers: {
                 Authorization: `Bearer ${this.accessToken}`,
                 "Content-Type": "application/json",
-                "User-Agent": "kikobooks-mcp-server/0.1.0",
+                ...getClientHeaders(),
             },
             body: JSON.stringify(body),
         });
@@ -219,10 +222,11 @@ class KikoBooksClient {
             const error = new Error(`API request failed: ${path}`) as any;
             error.status = response.status;
             error.statusText = response.statusText;
+            const bodyText = await response.text();
             try {
-                error.body = await response.json();
+                error.body = JSON.parse(bodyText);
             } catch {
-                error.body = await response.text();
+                error.body = bodyText;
             }
             throw error;
         }
@@ -241,7 +245,7 @@ class KikoBooksClient {
             headers: {
                 Authorization: `Bearer ${this.accessToken}`,
                 "Content-Type": "application/json",
-                "User-Agent": "kikobooks-mcp-server/0.1.0",
+                ...getClientHeaders(),
             },
             body: JSON.stringify(body),
         });
@@ -250,10 +254,11 @@ class KikoBooksClient {
             const error = new Error(`API request failed: ${path}`) as any;
             error.status = response.status;
             error.statusText = response.statusText;
+            const bodyText = await response.text();
             try {
-                error.body = await response.json();
+                error.body = JSON.parse(bodyText);
             } catch {
-                error.body = await response.text();
+                error.body = bodyText;
             }
             throw error;
         }
@@ -272,7 +277,7 @@ class KikoBooksClient {
             headers: {
                 Authorization: `Bearer ${this.accessToken}`,
                 "Content-Type": "application/json",
-                "User-Agent": "kikobooks-mcp-server/0.1.0",
+                ...getClientHeaders(),
             },
         });
 
@@ -280,10 +285,11 @@ class KikoBooksClient {
             const error = new Error(`API request failed: ${path}`) as any;
             error.status = response.status;
             error.statusText = response.statusText;
+            const bodyText = await response.text();
             try {
-                error.body = await response.json();
+                error.body = JSON.parse(bodyText);
             } catch {
-                error.body = await response.text();
+                error.body = bodyText;
             }
             throw error;
         }

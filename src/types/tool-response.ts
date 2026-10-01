@@ -1,5 +1,11 @@
-export interface ToolResponse<T> {
-    result: T | null;
-    isError: boolean;
-    error: string | null;
-}
+export type ToolResponse<T> =
+    | {
+        result: T;
+        isError: false;
+        error: null;
+    }
+    | {
+        result: null;
+        isError: true;
+        error: string;
+    };
