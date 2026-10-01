@@ -5,6 +5,7 @@ import { UpdateInvoiceTool } from "./update-invoice.tool.js";
 import { UpdateItemTool } from "./update-item.tool.js";
 import { UpdatePurchaseTool } from "./update-purchase.tool.js";
 import { UpdateVendorTool } from "./update-vendor.tool.js";
+import { UpdateDealTool } from "./update-deal.tool.js";
 
 export const UpdateTools = [
     UpdateAccountTool,
@@ -14,4 +15,5 @@ export const UpdateTools = [
     UpdateItemTool,
     UpdatePurchaseTool,
     UpdateVendorTool,
+    UpdateDealTool,
 ];
