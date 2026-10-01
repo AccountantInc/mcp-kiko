@@ -10,6 +10,8 @@ import { GetPaymentTool } from "./get-payment.tool.js";
 import { GetPurchaseTool } from "./get-purchase.tool.js";
 import { GetSalesReceiptTool } from "./get-sales-receipt.tool.js";
 import { GetVendorTool } from "./get-vendor.tool.js";
+import { GetConnectionStatusTool } from "./get-connection-status.tool.js";
+import { GetEnabledModulesTool } from "./get-enabled-modules.tool.js";
 
 export const GetTools = [
     GetAccountTool,
@@ -24,4 +26,6 @@ export const GetTools = [
     GetPurchaseTool,
     GetSalesReceiptTool,
     GetVendorTool,
+    GetConnectionStatusTool,
+    GetEnabledModulesTool,
 ];

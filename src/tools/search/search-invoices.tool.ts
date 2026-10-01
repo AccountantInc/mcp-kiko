@@ -8,12 +8,21 @@ const toolSchema = z.object({
         .enum(["DRAFT", "PENDING", "SENT", "VIEWED", "PARTIAL", "PAID", "VOID", "WRITE_OFF"])
         .optional()
         .describe("Filter by invoice status"),
-    customerId: z.number().optional().describe("Filter by customer ID"),
-    dateFrom: z.string().optional().describe("Start date filter (YYYY-MM-DD)"),
-    dateTo: z.string().optional().describe("End date filter (YYYY-MM-DD)"),
-    overdue: z.boolean().optional().describe("Filter for overdue invoices only"),
+    customerId: z.number().optional().describe("Filter by customer ID (AR_Customer_Id)"),
+    invoiceDateFrom: z.string().optional().describe("Invoice date on/after (YYYY-MM-DD)"),
+    invoiceDateTo: z.string().optional().describe("Invoice date on/before (YYYY-MM-DD)"),
+    dueDateFrom: z.string().optional().describe("Due date on/after (YYYY-MM-DD)"),
+    dueDateTo: z.string().optional().describe("Due date on/before (YYYY-MM-DD)"),
+    isOverdue: z.boolean().optional().describe("Only invoices past their due date"),
+    hasBalance: z.boolean().optional().describe("Only invoices with an outstanding balance"),
+    termsCode: z.string().optional().describe("Filter by payment terms code"),
+    currencyCode: z.string().optional().describe("Filter by ISO currency code"),
+    isPosted: z.boolean().optional().describe("Filter by GL posting state"),
+    srcProvider: z.string().optional().describe("Filter by source provider (e.g. Stripe, BILL)"),
     page: z.number().optional().describe("Page number (default: 1)"),
-    pageSize: z.number().optional().describe("Results per page (default: 50, max: 500)"),
+    pageSize: z.number().optional().describe("Results per page (default: 50)"),
+    sortColumn: z.string().optional().describe("Sort column (default: AR_Invoice_Id)"),
+    sortDirection: z.enum(["ASC", "DESC"]).optional().describe("Sort direction (default: DESC)"),
 });
 
 const toolHandler = async (args: any) => {

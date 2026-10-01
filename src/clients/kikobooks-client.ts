@@ -1,174 +1,241 @@
-import { config } from "dotenv";
-config();
+import { getConfig, type KikoBooksConfig } from "../config.js";
+import { TokenStore, type StoredTokens } from "./token-store.js";
 
-import { getClientHeaders } from "../helpers/get-client-headers.js";
-
-interface AuthTokens {
-    accessToken: string;
-    refreshToken?: string;
-    expiresAt?: Date;
+/** Normalized API error thrown by the client on non-2xx responses. */
+export class KikoBooksApiError extends Error {
+    constructor(
+        message: string,
+        readonly status: number,
+        readonly body: unknown
+    ) {
+        super(message);
+        this.name = "KikoBooksApiError";
+    }
 }
 
-class KikoBooksClient {
-    private readonly baseUrl: string;
-    private readonly apiKey?: string;
+type QueryParams = Record<string, string | number | boolean | undefined | null>;
+
+const USER_AGENT = "kikobooks-mcp-server/0.2.0";
+/** Refresh slightly before true expiry to avoid 401 races. */
+const EXPIRY_SKEW_MS = 30_000;
+
+/**
+ * Authenticated REST client for the KikoBooks API.
+ *
+ * Auth precedence: valid cached access token → refresh token → org API key.
+ * A failed refresh automatically falls back to re-authenticating with the API
+ * key. Rotated tokens are persisted via {@link TokenStore}; the API key is not.
+ */
+export class KikoBooksClient {
+    private readonly cfg: KikoBooksConfig;
+    private readonly store: TokenStore;
+
     private accessToken?: string;
     private refreshToken?: string;
-    private tokenExpiresAt?: Date;
-    private isAuthenticating: boolean = false;
+    private expiresAt?: Date;
+    private authInFlight?: Promise<void>;
 
-    constructor() {
-        const baseUrl = process.env.KIKOBOOKS_BASE_URL;
-        if (!baseUrl) {
-            throw new Error(
-                "KIKOBOOKS_BASE_URL environment variable is required. " +
-                "Example: https://mcp.kikobooks.com"
-            );
-        }
-        this.baseUrl = baseUrl.replace(/\/+$/, ""); // Remove trailing slashes
+    constructor(cfg: KikoBooksConfig = getConfig()) {
+        this.cfg = cfg;
+        this.store = new TokenStore(cfg.tokenStorePath);
 
-        this.apiKey = process.env.KIKOBOOKS_API_KEY;
-        this.accessToken = process.env.KIKOBOOKS_ACCESS_TOKEN;
-        this.refreshToken = process.env.KIKOBOOKS_REFRESH_TOKEN;
+        const persisted = this.store.load();
+        this.accessToken = cfg.accessToken ?? persisted.accessToken;
+        this.refreshToken = cfg.refreshToken ?? persisted.refreshToken;
+        this.expiresAt = persisted.expiresAt ? new Date(persisted.expiresAt) : undefined;
     }
 
-    /**
-     * Ensures we have a valid access token before making API calls.
-     */
-    async authenticate(): Promise<void> {
-        // Prevent concurrent auth attempts
-        if (this.isAuthenticating) {
-            await new Promise<void>((resolve) => {
-                const check = setInterval(() => {
-                    if (!this.isAuthenticating) {
-                        clearInterval(check);
-                        resolve();
-                    }
-                }, 100);
-            });
-            return;
-        }
+    /** True when any credential is configured (not whether it is currently valid). */
+    hasCredentials(): boolean {
+        return Boolean(this.cfg.apiKey || this.accessToken || this.refreshToken);
+    }
 
-        // If we have a valid token, skip
-        if (this.accessToken && this.tokenExpiresAt && this.tokenExpiresAt > new Date()) {
-            return;
-        }
-
-        this.isAuthenticating = true;
-
+    /** Resolves to true if a valid access token can be obtained right now. */
+    async checkConnection(): Promise<boolean> {
+        if (!this.hasCredentials()) return false;
         try {
-            if (this.refreshToken) {
-                await this.refreshAccessToken();
-            } else if (this.apiKey) {
-                await this.authenticateWithApiKey();
-            } else if (this.accessToken) {
-                // Direct token provided, assume it's valid
-                // Set a generous expiry if not known
-                if (!this.tokenExpiresAt) {
-                    this.tokenExpiresAt = new Date(Date.now() + 3600 * 1000);
-                }
-                return;
-            } else {
-                throw new Error(
-                    "No authentication credentials found. " +
-                    "Set KIKOBOOKS_API_KEY or KIKOBOOKS_ACCESS_TOKEN in your environment."
-                );
-            }
-        } finally {
-            this.isAuthenticating = false;
+            await this.authenticate();
+            return Boolean(this.accessToken);
+        } catch {
+            return false;
         }
     }
 
-    /**
-     * Authenticate using an API key — exchanges for JWT tokens.
-     */
+    /** Clears cached tokens and wipes the token store (connect/disconnect flows). */
+    disconnect(): void {
+        this.accessToken = undefined;
+        this.refreshToken = undefined;
+        this.expiresAt = undefined;
+        this.store.save({});
+    }
+
+    // ── Auth ────────────────────────────────────────────────────────────────
+
+    private tokenIsValid(): boolean {
+        return Boolean(
+            this.accessToken &&
+                this.expiresAt &&
+                this.expiresAt.getTime() - EXPIRY_SKEW_MS > Date.now()
+        );
+    }
+
+    private async authenticate(): Promise<void> {
+        if (this.tokenIsValid()) return;
+        if (this.authInFlight) return this.authInFlight;
+
+        this.authInFlight = this.doAuthenticate().finally(() => {
+            this.authInFlight = undefined;
+        });
+        return this.authInFlight;
+    }
+
+    private async doAuthenticate(): Promise<void> {
+        if (this.refreshToken) {
+            try {
+                await this.refreshAccessToken();
+                return;
+            } catch {
+                // Fall through to API-key re-auth below.
+                this.refreshToken = undefined;
+            }
+        }
+
+        if (this.cfg.apiKey) {
+            await this.authenticateWithApiKey();
+            return;
+        }
+
+        if (this.accessToken && this.expiresAt && this.expiresAt > new Date()) {
+            return; // Caller supplied a still-valid access token directly.
+        }
+
+        throw new Error(
+            "No usable KikoBooks credentials. Set KIKOBOOKS_API_KEY (or a valid " +
+                "KIKOBOOKS_ACCESS_TOKEN/KIKOBOOKS_REFRESH_TOKEN) in the environment."
+        );
+    }
+
     private async authenticateWithApiKey(): Promise<void> {
-        const response = await fetch(`${this.baseUrl}/api/Auth/api-key`, {
+        const res = await fetch(`${this.cfg.baseUrl}/api/Auth/api-key`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ apiKey: this.apiKey }),
+            headers: { "Content-Type": "application/json", "User-Agent": USER_AGENT },
+            body: JSON.stringify({ apiKey: this.cfg.apiKey }),
         });
 
-        if (!response.ok) {
-            const text = await response.text();
-            throw new Error(
-                `Authentication failed (${response.status}): ${text}`
-            );
+        if (!res.ok) {
+            throw new Error(`API-key authentication failed (${res.status}).`);
         }
 
-        const data = await response.json();
-
-        // KikoBooks wraps responses in ValueDataResponse { isSuccess, response: { ... } }
+        const data = (await res.json()) as ValueDataResponse;
         if (data.isSuccess === false) {
-            throw new Error(
-                `Authentication failed: ${data.endUserMessage || "Invalid API key"}`
-            );
+            throw new Error("API-key authentication rejected by server.");
         }
-
-        const tokenData = data.response || data;
-        this.setTokens(tokenData);
+        this.setTokens(data.response ?? data);
     }
 
-    /**
-     * Refresh an expired access token using the refresh token.
-     */
     private async refreshAccessToken(): Promise<void> {
-        const response = await fetch(`${this.baseUrl}/api/Token/refreshToken`, {
+        const res = await fetch(`${this.cfg.baseUrl}/api/Token/refreshToken`, {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
+            headers: { "Content-Type": "application/json", "User-Agent": USER_AGENT },
             body: JSON.stringify({
                 token: this.accessToken,
                 refreshToken: this.refreshToken,
             }),
         });
 
-        if (!response.ok) {
-            // Refresh failed — try API key if available
-            if (this.apiKey) {
-                this.refreshToken = undefined;
-                await this.authenticateWithApiKey();
-                return;
-            }
-            throw new Error(
-                `Token refresh failed (${response.status}). Re-authenticate.`
-            );
+        if (!res.ok) {
+            throw new Error(`Token refresh failed (${res.status}).`);
         }
 
-        const data = await response.json();
-        const tokenData = data.response || data;
-        this.setTokens(tokenData);
-    }
-
-    private setTokens(data: any): void {
-        this.accessToken = data.accessToken || data.token || data.access_token;
-        this.refreshToken =
-            data.refreshToken || data.refresh_token || this.refreshToken;
-
-        // KikoBooks returns expriresAt (datetime) or expiresIn (seconds)
-        if (data.expriresAt || data.expiresAt) {
-            this.tokenExpiresAt = new Date(data.expriresAt || data.expiresAt);
-        } else {
-            const expiresIn = data.expiresIn || data.expires_in || data.sessionTime
-                ? (data.sessionTime || 60) * 60
-                : 3600;
-            this.tokenExpiresAt = new Date(Date.now() + expiresIn * 1000);
+        const data = (await res.json()) as ValueDataResponse;
+        if (data.isSuccess === false) {
+            throw new Error("Token refresh rejected by server.");
         }
+        this.setTokens(data.response ?? data);
     }
 
     /**
-     * Make an authenticated GET request to the KikoBooks API.
+     * Apply a TokenViewModel payload. Field names are read defensively because
+     * the envelope has shipped with minor casing variations over time.
      */
-    async get<T = any>(
+    private setTokens(payload: Record<string, unknown>): void {
+        const str = (...keys: string[]): string | undefined => {
+            for (const k of keys) {
+                const v = payload[k];
+                if (typeof v === "string" && v.length > 0) return v;
+            }
+            return undefined;
+        };
+
+        this.accessToken = str("accessToken", "token", "access_token") ?? this.accessToken;
+        this.refreshToken =
+            str("refreshToken", "refresh_token") ?? this.refreshToken;
+
+        const expiresAtStr = str("expiresAt", "expriresAt", "expires_at");
+        if (expiresAtStr) {
+            this.expiresAt = new Date(expiresAtStr);
+        } else {
+            const minutes = Number(payload["minutes"] ?? payload["sessionTime"]) || 60;
+            this.expiresAt = new Date(Date.now() + minutes * 60_000);
+        }
+
+        this.persist();
+    }
+
+    private persist(): void {
+        const tokens: StoredTokens = {
+            accessToken: this.accessToken,
+            refreshToken: this.refreshToken,
+            expiresAt: this.expiresAt?.toISOString(),
+        };
+        this.store.save(tokens);
+    }
+
+    // ── HTTP ────────────────────────────────────────────────────────────────
+
+    async get<T = unknown>(path: string, params?: QueryParams): Promise<T> {
+        return this.request<T>("GET", path, undefined, params);
+    }
+
+    async post<T = unknown>(path: string, body?: unknown): Promise<T> {
+        return this.request<T>("POST", path, body);
+    }
+
+    async put<T = unknown>(path: string, body?: unknown): Promise<T> {
+        return this.request<T>("PUT", path, body);
+    }
+
+    async delete<T = unknown>(path: string): Promise<T> {
+        return this.request<T>("DELETE", path);
+    }
+
+    private async request<T>(
+        method: string,
         path: string,
-        params?: Record<string, string | number | boolean | undefined>
+        body?: unknown,
+        params?: QueryParams
     ): Promise<T> {
         await this.authenticate();
+        const res = await this.send(method, path, body, params);
 
-        const url = new URL(`${this.baseUrl}${path}`);
+        // One transparent retry on 401 — the token may have just expired.
+        if (res.status === 401) {
+            this.expiresAt = undefined;
+            await this.authenticate();
+            const retry = await this.send(method, path, body, params);
+            return this.parse<T>(retry, path);
+        }
+
+        return this.parse<T>(res, path);
+    }
+
+    private send(
+        method: string,
+        path: string,
+        body?: unknown,
+        params?: QueryParams
+    ): Promise<Response> {
+        const url = new URL(`${this.cfg.baseUrl}${path}`);
         if (params) {
             for (const [key, value] of Object.entries(params)) {
                 if (value !== undefined && value !== null) {
@@ -177,129 +244,46 @@ class KikoBooksClient {
             }
         }
 
-        const response = await fetch(url.toString(), {
-            method: "GET",
+        return fetch(url.toString(), {
+            method,
             headers: {
                 Authorization: `Bearer ${this.accessToken}`,
                 "Content-Type": "application/json",
-                ...getClientHeaders(),
+                "User-Agent": USER_AGENT,
             },
+            body: body === undefined ? undefined : JSON.stringify(body),
         });
-
-        if (!response.ok) {
-            const error = new Error(`API request failed: ${path}`) as any;
-            error.status = response.status;
-            error.statusText = response.statusText;
-            const bodyText = await response.text();
-            try {
-                error.body = JSON.parse(bodyText);
-            } catch {
-                error.body = bodyText;
-            }
-            throw error;
-        }
-
-        return response.json();
     }
 
-    /**
-     * Make an authenticated POST request to the KikoBooks API.
-     */
-    async post<T = any>(path: string, body: any): Promise<T> {
-        await this.authenticate();
-
-        const response = await fetch(`${this.baseUrl}${path}`, {
-            method: "POST",
-            headers: {
-                Authorization: `Bearer ${this.accessToken}`,
-                "Content-Type": "application/json",
-                ...getClientHeaders(),
-            },
-            body: JSON.stringify(body),
-        });
-
-        if (!response.ok) {
-            const error = new Error(`API request failed: ${path}`) as any;
-            error.status = response.status;
-            error.statusText = response.statusText;
-            const bodyText = await response.text();
+    private async parse<T>(res: Response, path: string): Promise<T> {
+        if (!res.ok) {
+            let errBody: unknown;
             try {
-                error.body = JSON.parse(bodyText);
+                errBody = await res.json();
             } catch {
-                error.body = bodyText;
+                errBody = await res.text();
             }
-            throw error;
+            throw new KikoBooksApiError(
+                `KikoBooks API ${res.status} on ${path}`,
+                res.status,
+                errBody
+            );
         }
 
-        return response.json();
-    }
-
-    /**
-     * Make an authenticated PUT request to the KikoBooks API.
-     */
-    async put<T = any>(path: string, body: any): Promise<T> {
-        await this.authenticate();
-
-        const response = await fetch(`${this.baseUrl}${path}`, {
-            method: "PUT",
-            headers: {
-                Authorization: `Bearer ${this.accessToken}`,
-                "Content-Type": "application/json",
-                ...getClientHeaders(),
-            },
-            body: JSON.stringify(body),
-        });
-
-        if (!response.ok) {
-            const error = new Error(`API request failed: ${path}`) as any;
-            error.status = response.status;
-            error.statusText = response.statusText;
-            const bodyText = await response.text();
-            try {
-                error.body = JSON.parse(bodyText);
-            } catch {
-                error.body = bodyText;
-            }
-            throw error;
-        }
-
-        return response.json();
-    }
-
-    /**
-     * Make an authenticated DELETE request to the KikoBooks API.
-     */
-    async delete<T = any>(path: string): Promise<T> {
-        await this.authenticate();
-
-        const response = await fetch(`${this.baseUrl}${path}`, {
-            method: "DELETE",
-            headers: {
-                Authorization: `Bearer ${this.accessToken}`,
-                "Content-Type": "application/json",
-                ...getClientHeaders(),
-            },
-        });
-
-        if (!response.ok) {
-            const error = new Error(`API request failed: ${path}`) as any;
-            error.status = response.status;
-            error.statusText = response.statusText;
-            const bodyText = await response.text();
-            try {
-                error.body = JSON.parse(bodyText);
-            } catch {
-                error.body = bodyText;
-            }
-            throw error;
-        }
-
-        // Some DELETE endpoints return 204 No Content
-        const text = await response.text();
-        if (!text) return { success: true } as T;
-        return JSON.parse(text);
+        const text = await res.text();
+        if (!text) return undefined as T;
+        return JSON.parse(text) as T;
     }
 }
 
-// Singleton instance
+interface ValueDataResponse {
+    isSuccess?: boolean;
+    response?: Record<string, unknown>;
+    [key: string]: unknown;
+}
+
+/**
+ * Shared client instance. Constructed on first import (reads env via getConfig);
+ * handlers call `kikoBooksClient.get(...)` etc.
+ */
 export const kikoBooksClient = new KikoBooksClient();

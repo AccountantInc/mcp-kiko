@@ -1,5 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { ToolDefinition } from "../types/tool-definition.js";
+import { getConfig } from "../config.js";
 
 import { SearchTools } from "./search/index.js";
 import { GetTools } from "./get/index.js";
@@ -8,10 +9,29 @@ import { UpdateTools } from "./update/index.js";
 import { DeleteTools } from "./delete/index.js";
 import { ActionTools } from "./action/index.js";
 
+/** Mutating verb prefixes, grouped by the scope tier they require. */
+const WRITE_PREFIXES = ["create_", "post_", "reverse_"];
+const UPDATE_PREFIXES = ["update_"];
+const DELETE_PREFIXES = ["delete_", "void_"];
+
+/**
+ * True when a tool's scope tier is disabled via
+ * KIKOBOOKS_DISABLE_WRITE/UPDATE/DELETE. Read tools always register.
+ */
+function isTierDisabled(name: string): boolean {
+    const cfg = getConfig();
+    const has = (prefixes: string[]) => prefixes.some((p) => name.startsWith(p));
+    if (cfg.disableWrite && has(WRITE_PREFIXES)) return true;
+    if (cfg.disableUpdate && has(UPDATE_PREFIXES)) return true;
+    if (cfg.disableDelete && has(DELETE_PREFIXES)) return true;
+    return false;
+}
+
 function registerTools(server: McpServer, tools: ToolDefinition[]) {
-    tools.forEach((tool) =>
-        server.tool(tool.name, tool.description, tool.schema, tool.handler),
-    );
+    tools.forEach((tool) => {
+        if (isTierDisabled(tool.name)) return;
+        server.tool(tool.name, tool.description, tool.schema, tool.handler);
+    });
 }
 
 export function ToolFactory(server: McpServer) {
