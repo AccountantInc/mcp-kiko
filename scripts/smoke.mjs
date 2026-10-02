@@ -17,7 +17,7 @@ if (!apiKey) {
     process.exit(0);
 }
 
-const baseUrl = process.env.KIKOBOOKS_BASE_URL || "https://mcp.kikobooks.com";
+const baseUrl = process.env.KIKOBOOKS_BASE_URL || "https://ai.kikobooks.com";
 
 const transport = new StdioClientTransport({
     command: "node",

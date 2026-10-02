@@ -162,7 +162,7 @@ AI Client → MCP Server → KikoBooks API
 
 ```env
 # Required
-KIKOBOOKS_BASE_URL=https://mcp.kikobooks.com
+KIKOBOOKS_BASE_URL=https://ai.kikobooks.com
 KIKOBOOKS_API_KEY=your_api_key_here
 
 # Or manual token management
@@ -229,7 +229,7 @@ Once published, users will configure it like this:
       "command": "npx",
       "args": ["-y", "@agentkiko/kikobooks-mcp-server@latest"],
       "env": {
-        "KIKOBOOKS_BASE_URL": "https://mcp.kikobooks.com",
+        "KIKOBOOKS_BASE_URL": "https://ai.kikobooks.com",
         "KIKOBOOKS_API_KEY": "your_api_key_here"
       }
     }
@@ -245,7 +245,7 @@ Once published, users will configure it like this:
       "command": "npx",
       "args": ["-y", "@agentkiko/kikobooks-mcp-server@latest"],
       "env": {
-        "KIKOBOOKS_BASE_URL": "https://mcp.kikobooks.com",
+        "KIKOBOOKS_BASE_URL": "https://ai.kikobooks.com",
         "KIKOBOOKS_API_KEY": "your_api_key_here"
       }
     }

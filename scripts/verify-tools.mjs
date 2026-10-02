@@ -15,7 +15,7 @@ async function listTools(env) {
         args: ["dist/index.js"],
         env: {
             ...process.env,
-            KIKOBOOKS_BASE_URL: "https://mcp.kikobooks.com",
+            KIKOBOOKS_BASE_URL: "https://ai.kikobooks.com",
             KIKOBOOKS_API_KEY: "",
             ...env,
         },

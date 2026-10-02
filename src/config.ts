@@ -9,7 +9,7 @@ loadEnv();
  * callers must never print `apiKey` or any token value.
  */
 export interface KikoBooksConfig {
-    /** API base URL, e.g. https://mcp.kikobooks.com (no trailing slash). */
+    /** API base URL, e.g. https://ai.kikobooks.com (no trailing slash). */
     readonly baseUrl: string;
     /** Org API key ("kiko_..."). Exchanged for a JWT; never sent on data calls. */
     readonly apiKey?: string;
@@ -44,7 +44,7 @@ export function getConfig(): KikoBooksConfig {
     const rawBase = process.env.KIKOBOOKS_BASE_URL;
     if (!rawBase) {
         throw new Error(
-            "KIKOBOOKS_BASE_URL is required. Example: https://mcp.kikobooks.com"
+            "KIKOBOOKS_BASE_URL is required. Example: https://ai.kikobooks.com"
         );
     }
 
