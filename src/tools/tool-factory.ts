@@ -53,7 +53,11 @@ function isTierDisabled(name: string): boolean {
 function registerTools(server: McpServer, tools: ToolDefinition[]) {
     tools.forEach((tool) => {
         if (isTierDisabled(tool.name)) return;
-        server.tool(tool.name, tool.description, tool.schema, tool.handler);
+        // server.tool() expects a ZodRawShape ({ field: zodType }). Tools declare
+        // their schema as z.object({...}); unwrap to .shape so the input schema is
+        // emitted with its properties (passing the ZodObject directly yields none).
+        const shape = (tool.schema as any)?.shape ?? tool.schema;
+        server.tool(tool.name, tool.description, shape, tool.handler);
     });
 }
 

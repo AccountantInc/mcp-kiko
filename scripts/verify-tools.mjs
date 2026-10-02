@@ -24,7 +24,7 @@ async function listTools(env) {
     await client.connect(transport);
     const { tools } = await client.listTools();
     await client.close();
-    return tools.map((t) => t.name);
+    return tools;
 }
 
 const failures = [];
@@ -76,10 +76,11 @@ const WRITE_TOOLS = [
 const UPDATE_TOOLS = ["update_deal", "update_job_status", "update_task_status", "update_deposit", "update_fixed_asset"];
 const DELETE_TOOLS = ["delete_customer", "void_bill", "delete_deposit", "void_deposit", "delete_statement"];
 
-const all = await listTools({});
-const noWrite = await listTools({ KIKOBOOKS_DISABLE_WRITE: "true" });
-const noUpdate = await listTools({ KIKOBOOKS_DISABLE_UPDATE: "true" });
-const noDelete = await listTools({ KIKOBOOKS_DISABLE_DELETE: "true" });
+const allTools = await listTools({});
+const all = allTools.map((t) => t.name);
+const noWrite = (await listTools({ KIKOBOOKS_DISABLE_WRITE: "true" })).map((t) => t.name);
+const noUpdate = (await listTools({ KIKOBOOKS_DISABLE_UPDATE: "true" })).map((t) => t.name);
+const noDelete = (await listTools({ KIKOBOOKS_DISABLE_DELETE: "true" })).map((t) => t.name);
 
 console.log(`Tool catalog: ${all.length} tools`);
 
@@ -104,6 +105,25 @@ check(
         (t) => noWrite.includes(t) && noUpdate.includes(t) && noDelete.includes(t)
     )
 );
+
+// Regression guard: parameterized tools MUST expose their input-schema properties.
+// (Passing a ZodObject instead of its raw shape to server.tool() silently yields an
+// empty schema — agents then can't see any parameters.)
+const PARAMETERIZED = {
+    search_invoices: ["status", "customerId"],
+    create_deposit: ["depositDate", "bank_Account_Id", "lines"],
+    run_depreciation: ["fiscalYear", "periodNumber"],
+    start_reconciliation: ["bank_Account_Id", "statementBalance"],
+    create_fixed_asset: ["assetName", "acquisitionCost"],
+};
+for (const [name, expected] of Object.entries(PARAMETERIZED)) {
+    const t = allTools.find((x) => x.name === name);
+    const props = t?.inputSchema?.properties ? Object.keys(t.inputSchema.properties) : [];
+    check(
+        `input schema exposes params: ${name}`,
+        expected.every((p) => props.includes(p))
+    );
+}
 
 if (failures.length > 0) {
     console.error(`\n${failures.length} check(s) failed.`);

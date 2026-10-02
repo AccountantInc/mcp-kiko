@@ -73,6 +73,23 @@ This is **your public/external MCP server** for third-party AI integrations.
 | **Helpers** | Tool registration, error formatting | `register-tool.ts`, `format-error.ts` |
 | **Server** | MCP server singleton | `kikobooks-mcp-server.ts` |
 
+### Tool-authoring rules (learned the hard way)
+
+- **Schema registration.** Tools declare `schema: z.object({...})`, but the MCP SDK's
+  `server.tool(name, desc, paramsSchema, cb)` wants a **ZodRawShape** (`{ field: zodType }`).
+  `tool-factory.ts` unwraps to `.shape` centrally — passing the `ZodObject` directly emits an
+  **empty** input schema (agents see no params). Guarded by `scripts/verify-tools.mjs`
+  (`input schema exposes params`) and `scripts/schema-check.mjs`.
+- **Request-body casing.** The KikoBooks API uses **Newtonsoft.Json** with a
+  `CamelCasePropertyNamesContractResolver` and case-insensitive deserialization. Field casing
+  doesn't matter, but **underscores must match the C# DTO** (`Bank_Account_Id` → `bank_Account_Id`,
+  not `bankAccountId`). Model every write body against the real `Save*Dto`.
+- **Honest failure.** Only expose a tool that maps to a real endpoint + DTO. No balance-sheet
+  endpoint → no `get_balance_sheet`. Large nested create templates → deferred, not faked.
+- **Scope tiers.** New mutating verbs must be added to `WRITE_PREFIXES`/`UPDATE_PREFIXES`/
+  `DELETE_PREFIXES` so the `KIKOBOOKS_DISABLE_*` client flags hide them; the server's `api_scope`
+  middleware is the authoritative control regardless.
+
 ---
 
 ## Entity & Tool Inventory
