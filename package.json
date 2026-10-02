@@ -1,6 +1,6 @@
 {
     "name": "@agentkiko/kikobooks-mcp-server",
-    "version": "0.2.2",
+    "version": "0.2.3",
     "description": "MCP server implementation for KikoBooks bookkeeping integration",
     "license": "MIT",
     "author": "Advisor8 Inc (https://kikobooks.com)",
