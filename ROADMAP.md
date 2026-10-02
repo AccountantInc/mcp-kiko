@@ -12,7 +12,7 @@ This is **your public/external MCP server** for third-party AI integrations.
 > **`@agentkiko/kikobooks-mcp-server`** (latest `0.2.1`) and installable via
 > `npx -y @agentkiko/kikobooks-mcp-server`. Production API base URL is
 > **`https://ai.kikobooks.com`**. Phases 1 + 1.5 + read-only slices of Phases 2–4
-> are complete (96 tools); the remaining Phase 2–4 write/action tools are the forward roadmap.
+> are complete (116 tools); the remaining create-with-nested-template and per-transaction bank match/categorize tools are the forward roadmap.
 
 > **Note:** KikoBooks already has an **internal** .NET MCP server (`KikoBooks.McpServer`) that connects directly to the database via Dapper/MediatR. This new TypeScript server is different — it calls the **KikoBooks REST API** over HTTP, making it safe for external distribution.
 
@@ -124,6 +124,25 @@ tools for these modules remain on the forward roadmap below.*
 | **Deposits / Fixed Assets / Recurring / Statements / Org** | `search_deposits`, `get_deposit`, `search_fixed_assets`, `get_fixed_asset`, `search_recurring_schedules`, `get_recurring_schedule`, `search_statements`, `get_statement`, `get_organization_details` |
 
 **Running total: 96 tools.** (No `get_balance_sheet` — the API has no balance-sheet endpoint yet; omitted rather than faked.)
+
+### Phase 2–4 — Write/action slice ✅ (COMPLETE — 20 tools)
+*Workflow and lifecycle writes. Mutating — gated by the read-write API-key scope and the
+`KIKOBOOKS_DISABLE_WRITE` client flag.*
+
+| Area | Tools |
+|------|-------|
+| **Deposits** | `create_deposit`, `update_deposit`, `delete_deposit`, `void_deposit`, `post_deposit` |
+| **Fixed Assets** | `create_fixed_asset`, `update_fixed_asset`, `dispose_fixed_asset`, `run_depreciation` |
+| **Recurring** | `delete_recurring_schedule`, `pause_recurring_schedule`, `resume_recurring_schedule`, `activate_recurring_schedule`, `generate_recurring_invoice` |
+| **Statements** | `delete_statement`, `send_statement` |
+| **Reconciliation** | `start_reconciliation`, `complete_reconciliation`, `cancel_reconciliation`, `set_statement_balance` |
+
+**Running total: 116 tools.**
+
+**Deferred (intentional):** `create_recurring_schedule`, `create_statement`, and the
+per-bank-transaction match/categorize/record-transfer tools. Their request bodies are
+large nested templates (bill-to/ship-to/line arrays, cross-module matching) that warrant
+dedicated design rather than a best-effort mapping — omitted rather than faked.
 
 ### Phase 2 — Banking & Reconciliation (planned)
 

@@ -67,9 +67,14 @@ const WRITE_TOOLS = [
     "generate_invoice_from_proposal",
     "create_job_from_proposal",
     "generate_invoice_from_job",
+    "create_deposit",
+    "run_depreciation",
+    "start_reconciliation",
+    "post_deposit",
+    "dispose_fixed_asset",
 ];
-const UPDATE_TOOLS = ["update_deal", "update_job_status", "update_task_status"];
-const DELETE_TOOLS = ["delete_customer", "void_bill"];
+const UPDATE_TOOLS = ["update_deal", "update_job_status", "update_task_status", "update_deposit", "update_fixed_asset"];
+const DELETE_TOOLS = ["delete_customer", "void_bill", "delete_deposit", "void_deposit", "delete_statement"];
 
 const all = await listTools({});
 const noWrite = await listTools({ KIKOBOOKS_DISABLE_WRITE: "true" });
@@ -78,7 +83,7 @@ const noDelete = await listTools({ KIKOBOOKS_DISABLE_DELETE: "true" });
 
 console.log(`Tool catalog: ${all.length} tools`);
 
-check("catalog has at least 96 tools", all.length >= 96);
+check("catalog has at least 116 tools", all.length >= 116);
 for (const t of EXPECTED_READS) check(`read tool present: ${t}`, all.includes(t));
 
 check(

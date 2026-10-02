@@ -118,7 +118,7 @@ For local development, point to the built output:
 }
 ```
 
-## Available Tools (96 total)
+## Available Tools (116 total)
 
 ### Chart of Accounts
 | Tool | Description |
@@ -288,6 +288,21 @@ For local development, point to the built output:
 | `search_statements` / `get_statement` | Customer AR statements |
 | `get_organization_details` | Connected org profile and settings |
 
+### Deposits / Fixed Assets / Recurring / Statements / Reconciliation (write)
+Mutating — require a read-write API key and are hidden when `KIKOBOOKS_DISABLE_WRITE` is set.
+| Tool | Description |
+|------|-------------|
+| `create_deposit` / `update_deposit` / `delete_deposit` / `void_deposit` / `post_deposit` | Full deposit lifecycle (draft → post / void) |
+| `create_fixed_asset` / `update_fixed_asset` / `dispose_fixed_asset` | Fixed-asset register and disposal |
+| `run_depreciation` | Post depreciation for a fiscal year + period |
+| `delete_recurring_schedule` / `pause_recurring_schedule` / `resume_recurring_schedule` / `activate_recurring_schedule` / `generate_recurring_invoice` | Recurring schedule lifecycle |
+| `delete_statement` / `send_statement` | Customer statement delete and send |
+| `start_reconciliation` / `complete_reconciliation` / `cancel_reconciliation` / `set_statement_balance` | Bank reconciliation session lifecycle |
+
+> Not yet exposed (deferred): `create_recurring_schedule`, `create_statement`, and
+> per-transaction bank match/categorize — their request bodies are large nested
+> templates that warrant dedicated design rather than a best-effort mapping.
+
 ### Scope tiers
 Read tools (`get_*`, `search_*`) always load. Mutating tools are grouped into
 scope tiers that can be suppressed at startup:
@@ -353,7 +368,7 @@ src/
 ├── tools/                   # Tool definitions grouped by verb, registered via tool-factory
 │   ├── tool-factory.ts       # Registers all tools + applies scope-tier gating
 │   ├── search/  get/  create/  update/  delete/  action/
-│   └── ... (96 tools)
+│   └── ... (116 tools)
 ├── handlers/                # Business logic (calls the API client)
 ├── helpers/                 # register-tool, format-error, get-package-version
 └── types/                   # tool-definition, tool-response

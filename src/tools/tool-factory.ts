@@ -11,6 +11,7 @@ import { ActionTools } from "./action/index.js";
 import { ReportTools } from "./reports/index.js";
 import { BankingTools } from "./banking/index.js";
 import { AdvancedTools } from "./advanced/index.js";
+import { WriteTools } from "./write/index.js";
 
 /** Mutating verb prefixes, grouped by the scope tier they require. */
 const WRITE_PREFIXES = [
@@ -23,6 +24,15 @@ const WRITE_PREFIXES = [
     "generate_",
     "approve_",
     "copy_",
+    "dispose_",
+    "run_",
+    "pause_",
+    "resume_",
+    "activate_",
+    "start_",
+    "complete_",
+    "cancel_",
+    "set_",
 ];
 const UPDATE_PREFIXES = ["update_"];
 const DELETE_PREFIXES = ["delete_", "void_"];
@@ -57,4 +67,5 @@ export function ToolFactory(server: McpServer) {
     registerTools(server, ReportTools);
     registerTools(server, BankingTools);
     registerTools(server, AdvancedTools);
+    registerTools(server, WriteTools);
 }

@@ -12,11 +12,13 @@ through the MCP tools this server exposes — safely, and always grounded in too
 
 ## Tooling
 
-96 tools across accounting (accounts, customers, invoices, items, vendors, bills,
+116 tools across accounting (accounts, customers, invoices, items, vendors, bills,
 journal entries, payments, credit memos, sales receipts, expenses), CRM, Proposals,
 Workflow, lifecycle bridges, read-only reports (trial balance, P&L, AR/AP aging, cash
 position, income/expense by category, business health), banking (accounts,
 transactions, reconciliation), deposits, fixed assets, recurring schedules, statements,
+plus write actions (deposit lifecycle, fixed-asset register/dispose, run depreciation,
+recurring pause/resume/activate/generate, statement send, reconciliation lifecycle),
 and connection/discovery. Read tools are `get_*` /
 `search_*`; everything else mutates. See [README.md](README.md) for the full list.
 
