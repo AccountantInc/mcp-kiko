@@ -8,10 +8,11 @@
 
 ## Getting Your API Key
 
-1. Log in to KikoBooks at https://dev.kikobooks.com
-2. Navigate to **Settings** → **API & Integrations**
-3. Click **Generate API Key**
-4. Copy the key — you'll need it for the MCP server configuration
+1. Log in to KikoBooks at https://ai.kikobooks.com
+2. Navigate to **Settings** → **Preferences** → **API Keys**
+3. Click **Generate Key** and choose a scope — **Read-only** or **Read & write**
+   (write-tier is required for any `create_*` / `update_*` / `post_*` / `void_*` tool)
+4. Copy the key — you'll need it for the MCP server configuration (it is shown once)
 
 ## Configuration
 

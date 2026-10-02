@@ -37,6 +37,12 @@ tier. If the server was started with `KIKOBOOKS_DISABLE_WRITE/UPDATE/DELETE`, th
 tools are simply **not present** in the tool list — surface that to the user and stop;
 do not try to work around it. One write-tier grant covers all writes.
 
+Separately, the **API key itself carries a server-side scope** (Read-only or Read &
+write, chosen when the key is generated). A Read-only key returns **HTTP 403** on every
+mutating call even if the tool is present. If a write fails with 403, do not retry —
+tell the user their key is Read-only and they must generate a **Read & write** key
+(Settings → Preferences → API Keys).
+
 ## Common flows
 
 - **Read each tool's input schema from the live MCP tool list immediately before calling

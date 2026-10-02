@@ -8,6 +8,12 @@ It gives AI agents the ability to search, create, update, and manage your accoun
 
 This is **your public/external MCP server** for third-party AI integrations.
 
+> **Status (shipped):** Public repo, MIT-licensed, published to npm as
+> **`@agentkiko/kikobooks-mcp-server`** (latest `0.2.1`) and installable via
+> `npx -y @agentkiko/kikobooks-mcp-server`. Production API base URL is
+> **`https://ai.kikobooks.com`**. Phases 1 + 1.5 are complete (73 tools);
+> Phases 2–4 below are the forward roadmap.
+
 > **Note:** KikoBooks already has an **internal** .NET MCP server (`KikoBooks.McpServer`) that connects directly to the database via Dapper/MediatR. This new TypeScript server is different — it calls the **KikoBooks REST API** over HTTP, making it safe for external distribution.
 
 ---
@@ -24,7 +30,7 @@ This is **your public/external MCP server** for third-party AI integrations.
 | **Industry standard** | MCP servers for accounting platforms are public MIT-licensed repos |
 | **No secrets exposed** | The server contains zero secrets — all credentials come from environment variables at runtime |
 
-**Recommendation:** Public repo, MIT license, `.env` in `.gitignore`.
+**Recommendation:** Public repo, MIT license, `.env` in `.gitignore`. **(Done — shipped.)**
 
 ---
 
@@ -165,6 +171,9 @@ AI Client → MCP Server → KikoBooks API
 KIKOBOOKS_BASE_URL=https://ai.kikobooks.com
 KIKOBOOKS_API_KEY=your_api_key_here
 
+# The API key's scope (Read-only or Read & write) is chosen in the KikoBooks UI
+# when the key is generated. A Read-only key returns HTTP 403 on any write.
+
 # Or manual token management
 KIKOBOOKS_ACCESS_TOKEN=your_jwt_token
 KIKOBOOKS_REFRESH_TOKEN=your_refresh_token
@@ -219,7 +228,7 @@ kikobooks-mcp-server/
 
 ## Claude Desktop / VS Code Configuration
 
-Once published, users will configure it like this:
+Users configure it like this:
 
 ### Claude Desktop (`claude_desktop_config.json`)
 ```json

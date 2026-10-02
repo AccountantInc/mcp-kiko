@@ -36,6 +36,10 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for [K
 
 ## Setup
 
+> **Most users don't need this.** To use the published server, skip to
+> [Configuration](#configuration) — the `npx` command pulls it from npm automatically.
+> The steps below are for local development / contributing.
+
 1. Install dependencies:
 ```bash
 npm install
