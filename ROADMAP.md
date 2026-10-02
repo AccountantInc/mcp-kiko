@@ -11,8 +11,8 @@ This is **your public/external MCP server** for third-party AI integrations.
 > **Status (shipped):** Public repo, MIT-licensed, published to npm as
 > **`@agentkiko/kikobooks-mcp-server`** (latest `0.2.1`) and installable via
 > `npx -y @agentkiko/kikobooks-mcp-server`. Production API base URL is
-> **`https://ai.kikobooks.com`**. Phases 1 + 1.5 are complete (73 tools);
-> Phases 2–4 below are the forward roadmap.
+> **`https://ai.kikobooks.com`**. Phases 1 + 1.5 + read-only slices of Phases 2–4
+> are complete (96 tools); the remaining Phase 2–4 write/action tools are the forward roadmap.
 
 > **Note:** KikoBooks already has an **internal** .NET MCP server (`KikoBooks.McpServer`) that connects directly to the database via Dapper/MediatR. This new TypeScript server is different — it calls the **KikoBooks REST API** over HTTP, making it safe for external distribution.
 
@@ -112,6 +112,18 @@ first.*
 
 **Lifecycle bridges:** CRM deal → proposal → job → invoice, end to end.
 **Running total: 73 tools.**
+
+### Phase 2–4 — Read-only slices ✅ (COMPLETE — 23 tools)
+*Agent-facing reads across reporting, banking, and advanced modules. Write/action
+tools for these modules remain on the forward roadmap below.*
+
+| Area | Tools |
+|------|-------|
+| **Reports** | `get_trial_balance`, `get_profit_and_loss`, `get_ar_aging`, `get_ap_aging`, `get_cash_position`, `get_expense_by_category`, `get_income_by_category`, `get_business_health` |
+| **Banking** | `search_bank_accounts`, `get_bank_account`, `search_bank_transactions`, `get_bank_transaction`, `search_reconciliation_sessions`, `get_reconciliation_summary` |
+| **Deposits / Fixed Assets / Recurring / Statements / Org** | `search_deposits`, `get_deposit`, `search_fixed_assets`, `get_fixed_asset`, `search_recurring_schedules`, `get_recurring_schedule`, `search_statements`, `get_statement`, `get_organization_details` |
+
+**Running total: 96 tools.** (No `get_balance_sheet` — the API has no balance-sheet endpoint yet; omitted rather than faked.)
 
 ### Phase 2 — Banking & Reconciliation (planned)
 

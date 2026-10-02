@@ -22,6 +22,9 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for [K
 - **Proposals** — Search and copy proposals; convert accepted proposals to invoices or jobs
 - **Workflow** — Jobs (Projects/Engagements) and tasks; status updates and job-to-invoice billing
 - **Lifecycle bridges** — CRM deal → proposal → job → invoice, end to end
+- **Reports** — Trial balance, profit & loss, AR/AP aging, cash position, income/expense by category, business health (read-only)
+- **Banking** — Bank accounts, imported transactions, and reconciliation sessions/summary (read-only)
+- **Deposits, Fixed Assets, Recurring Schedules, Statements** — Search and get (read-only)
 - **Connection & discovery** — Connection status and per-org enabled-module discovery (no secrets exposed)
 
 > CRM, Proposals, and Workflow tools require the org to have the Sales / Workflow
@@ -115,7 +118,7 @@ For local development, point to the built output:
 }
 ```
 
-## Available Tools (73 total)
+## Available Tools (96 total)
 
 ### Chart of Accounts
 | Tool | Description |
@@ -254,6 +257,37 @@ For local development, point to the built output:
 | `get_connection_status` | Report connected / unauthenticated / disconnected — never returns secrets |
 | `get_enabled_modules` | List which modules (Sales, Workflow) the org has enabled |
 
+### Reports (read-only)
+| Tool | Description |
+|------|-------------|
+| `get_trial_balance` | Trial balance (debit/credit per GL account) as of a date |
+| `get_profit_and_loss` | Monthly profit & loss (income statement) trend |
+| `get_ar_aging` | AR aging brackets (current, 1-30, 31-60, 61-90, 90+) |
+| `get_ap_aging` | AP aging brackets (current, 1-30, 31-60, 61-90, 90+) |
+| `get_cash_position` | Cash across GL + bank accounts as of a date |
+| `get_expense_by_category` | Expense breakdown by category |
+| `get_income_by_category` | Income breakdown by category |
+| `get_business_health` | Composite business-health indicators |
+
+### Banking (read-only)
+| Tool | Description |
+|------|-------------|
+| `search_bank_accounts` | Search bank accounts with paging and filters |
+| `get_bank_account` | Get a bank account by ID |
+| `search_bank_transactions` | Search imported bank transactions (append-only evidence) |
+| `get_bank_transaction` | Get a bank transaction by ID |
+| `search_reconciliation_sessions` | Search reconciliation sessions |
+| `get_reconciliation_summary` | Reconciliation summary across accounts |
+
+### Deposits, Fixed Assets, Recurring, Statements (read-only)
+| Tool | Description |
+|------|-------------|
+| `search_deposits` / `get_deposit` | Bank deposits and allocated payments |
+| `search_fixed_assets` / `get_fixed_asset` | Capitalized assets and depreciation settings |
+| `search_recurring_schedules` / `get_recurring_schedule` | Recurring invoice schedules |
+| `search_statements` / `get_statement` | Customer AR statements |
+| `get_organization_details` | Connected org profile and settings |
+
 ### Scope tiers
 Read tools (`get_*`, `search_*`) always load. Mutating tools are grouped into
 scope tiers that can be suppressed at startup:
@@ -319,7 +353,7 @@ src/
 ├── tools/                   # Tool definitions grouped by verb, registered via tool-factory
 │   ├── tool-factory.ts       # Registers all tools + applies scope-tier gating
 │   ├── search/  get/  create/  update/  delete/  action/
-│   └── ... (73 tools)
+│   └── ... (96 tools)
 ├── handlers/                # Business logic (calls the API client)
 ├── helpers/                 # register-tool, format-error, get-package-version
 └── types/                   # tool-definition, tool-response

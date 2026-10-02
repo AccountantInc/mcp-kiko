@@ -8,6 +8,9 @@ import { CreateTools } from "./create/index.js";
 import { UpdateTools } from "./update/index.js";
 import { DeleteTools } from "./delete/index.js";
 import { ActionTools } from "./action/index.js";
+import { ReportTools } from "./reports/index.js";
+import { BankingTools } from "./banking/index.js";
+import { AdvancedTools } from "./advanced/index.js";
 
 /** Mutating verb prefixes, grouped by the scope tier they require. */
 const WRITE_PREFIXES = [
@@ -51,4 +54,7 @@ export function ToolFactory(server: McpServer) {
     registerTools(server, UpdateTools);
     registerTools(server, DeleteTools);
     registerTools(server, ActionTools);
+    registerTools(server, ReportTools);
+    registerTools(server, BankingTools);
+    registerTools(server, AdvancedTools);
 }

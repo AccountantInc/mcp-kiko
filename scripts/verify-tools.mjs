@@ -47,6 +47,15 @@ const EXPECTED_READS = [
     "search_proposals",
     "search_jobs",
     "list_job_tasks",
+    "get_trial_balance",
+    "get_profit_and_loss",
+    "get_ar_aging",
+    "get_ap_aging",
+    "search_bank_accounts",
+    "search_bank_transactions",
+    "search_deposits",
+    "search_fixed_assets",
+    "get_organization_details",
 ];
 const WRITE_TOOLS = [
     "create_customer",
@@ -69,7 +78,7 @@ const noDelete = await listTools({ KIKOBOOKS_DISABLE_DELETE: "true" });
 
 console.log(`Tool catalog: ${all.length} tools`);
 
-check("catalog has at least 73 tools", all.length >= 73);
+check("catalog has at least 96 tools", all.length >= 96);
 for (const t of EXPECTED_READS) check(`read tool present: ${t}`, all.includes(t));
 
 check(

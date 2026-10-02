@@ -1,0 +1,13 @@
+{
+  "servers": {
+    "kikobooks": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@agentkiko/kikobooks-mcp-server@latest"],
+      "env": {
+        "KIKOBOOKS_BASE_URL": "${env:KIKOBOOKS_BASE_URL}",
+        "KIKOBOOKS_API_KEY": "${env:KIKO_RW_KEY}"
+      }
+    }
+  }
+}
