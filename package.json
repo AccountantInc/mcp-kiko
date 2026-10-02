@@ -1,5 +1,5 @@
 {
-    "name": "@kikobooks/kikobooks-mcp-server",
+    "name": "@agentkiko/kikobooks-mcp-server",
     "version": "0.2.0",
     "description": "MCP server implementation for KikoBooks bookkeeping integration",
     "license": "MIT",

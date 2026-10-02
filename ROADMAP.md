@@ -20,7 +20,7 @@ This is **your public/external MCP server** for third-party AI integrations.
 |--------|--------|
 | **Discoverability** | MCP servers are listed on directories like [glama.ai](https://glama.ai/mcp/servers), [smithery.ai](https://smithery.ai/) — they require public repos |
 | **Trust** | Users want to inspect what an MCP server does before granting it API access |
-| **NPX distribution** | `npx @kikobooks/kikobooks-mcp-server` requires a public npm package backed by public source |
+| **NPX distribution** | `npx @agentkiko/kikobooks-mcp-server` requires a public npm package backed by public source |
 | **Industry standard** | MCP servers for accounting platforms are public MIT-licensed repos |
 | **No secrets exposed** | The server contains zero secrets — all credentials come from environment variables at runtime |
 
@@ -227,7 +227,7 @@ Once published, users will configure it like this:
   "mcpServers": {
     "kikobooks": {
       "command": "npx",
-      "args": ["-y", "@kikobooks/kikobooks-mcp-server@latest"],
+      "args": ["-y", "@agentkiko/kikobooks-mcp-server@latest"],
       "env": {
         "KIKOBOOKS_BASE_URL": "https://mcp.kikobooks.com",
         "KIKOBOOKS_API_KEY": "your_api_key_here"
@@ -243,7 +243,7 @@ Once published, users will configure it like this:
   "servers": {
     "kikobooks": {
       "command": "npx",
-      "args": ["-y", "@kikobooks/kikobooks-mcp-server@latest"],
+      "args": ["-y", "@agentkiko/kikobooks-mcp-server@latest"],
       "env": {
         "KIKOBOOKS_BASE_URL": "https://mcp.kikobooks.com",
         "KIKOBOOKS_API_KEY": "your_api_key_here"
@@ -301,5 +301,5 @@ Once published, users will configure it like this:
 4. ✅ Scaffold Phase 0 (project setup, client, server, types, helpers)
 5. ✅ Implement Phase 1 tools (50 tools for core bookkeeping)
 6. 🔲 Test with Claude Desktop / VS Code
-7. 🔲 Publish to npm as `@kikobooks/kikobooks-mcp-server`
+7. 🔲 Publish to npm as `@agentkiko/kikobooks-mcp-server`
 8. 🔲 Submit to MCP server directories

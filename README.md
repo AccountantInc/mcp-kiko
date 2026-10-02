@@ -63,7 +63,7 @@ Add to your `claude_desktop_config.json`:
   "mcpServers": {
     "kikobooks": {
       "command": "npx",
-      "args": ["-y", "@kikobooks/kikobooks-mcp-server@latest"],
+      "args": ["-y", "@agentkiko/kikobooks-mcp-server@latest"],
       "env": {
         "KIKOBOOKS_BASE_URL": "https://mcp.kikobooks.com",
         "KIKOBOOKS_API_KEY": "your_api_key_here"
@@ -82,7 +82,7 @@ Add to `.vscode/mcp.json` in your project:
   "servers": {
     "kikobooks": {
       "command": "npx",
-      "args": ["-y", "@kikobooks/kikobooks-mcp-server@latest"],
+      "args": ["-y", "@agentkiko/kikobooks-mcp-server@latest"],
       "env": {
         "KIKOBOOKS_BASE_URL": "https://mcp.kikobooks.com",
         "KIKOBOOKS_API_KEY": "your_api_key_here"
