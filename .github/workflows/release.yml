@@ -4,6 +4,12 @@ on:
   push:
     tags: ["v*"]
 
+# Serialize publishes per tag so two runs can never race the same version
+# (npm provenance "staging" + a second run = E409 Cannot publish over staged version).
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     name: Publish to npm
@@ -21,6 +27,14 @@ jobs:
       - run: npm ci
       # Gate the publish on the same drift guard CI uses.
       - run: npm run verify
-      - run: npm publish --access public --provenance
+      # Idempotent: skip if this version is already on the registry (safe re-runs).
+      - name: Publish to npm (if new)
+        run: |
+          VER=$(node -p "require('./package.json').version")
+          if npm view "@agentkiko/kikobooks-mcp-server@${VER}" version >/dev/null 2>&1; then
+            echo "Version ${VER} already published; skipping."
+          else
+            npm publish --access public --provenance
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
