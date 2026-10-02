@@ -5,6 +5,7 @@ on:
     branches: [main, venu]
   pull_request:
     branches: [main, venu]
+  workflow_dispatch:
 
 jobs:
   build-verify:
