@@ -357,6 +357,13 @@ into scope tiers that can be suppressed at startup (set the flag to `true` or `1
 - MCP clients ask you to confirm tool calls before they run. Review each write before you approve it.
 - Report vulnerabilities to info@accountant.world with the subject "Security vulnerability report".
 
+## Privacy and terms
+
+- This package sends no telemetry. It runs on your machine and talks only to the `KIKOBOOKS_BASE_URL` you configure.
+- Nothing is written to disk unless you set `KIKOBOOKS_TOKEN_STORE_PATH`; then only the short-lived session tokens are saved there (owner-only permissions on macOS and Linux), never the API key.
+- Your MCP client and the AI model it uses (for example, Claude or GitHub Copilot) see the tool results you request. Their providers' terms and privacy policies govern that data.
+- Using KikoBooks through this server is covered by the [KikoBooks Terms of Service](https://kikobooks.com/terms.html) and [Privacy Policy](https://kikobooks.com/privacy.html). KikoBooks is offered to U.S. businesses only.
+
 ## Authentication
 
 The server supports two authentication methods:
