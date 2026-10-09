@@ -23,8 +23,8 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for [K
 - **Workflow** — Jobs (Projects/Engagements) and tasks; status updates and job-to-invoice billing
 - **Lifecycle bridges** — CRM deal → proposal → job → invoice, end to end
 - **Reports** — Trial balance, profit & loss, AR/AP aging, cash position, income/expense by category, business health (read-only)
-- **Banking** — Bank accounts, imported transactions, and reconciliation sessions/summary (read-only)
-- **Deposits, Fixed Assets, Recurring Schedules, Statements** — Search and get (read-only)
+- **Banking** — Bank accounts, imported transactions, and reconciliation sessions, plus the reconciliation lifecycle (start, set statement balance, complete, cancel)
+- **Deposits, Fixed Assets, Recurring Schedules, Statements** — Search and get, plus deposit posting, fixed-asset depreciation and disposal, recurring-schedule controls, and statement sending
 - **Connection & discovery** — Connection status and per-org enabled-module discovery (no secrets exposed)
 
 > CRM, Proposals, and Workflow tools require the org to have the Sales / Workflow
@@ -34,8 +34,15 @@ A [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server for [K
 ## Prerequisites
 
 - Node.js 18 or higher
-- A KikoBooks account with API access
-- An API key from your KikoBooks organization settings
+- A KikoBooks or Accountant.World organization ([start free](https://ai.kikobooks.com/auth/get-started))
+- An org API key: sign in, open **Settings → API Keys** ([direct link](https://ai.kikobooks.com/app/settings/api-keys)),
+  create a key, and copy it once. Keys can be scoped, set to expire, and revoked at any time.
+
+### Supported clients
+
+Any MCP client that can launch a local (stdio) server: Claude Desktop, Claude Code, Cursor, Windsurf,
+VS Code (GitHub Copilot), and others. ChatGPT connectors require a hosted (remote HTTPS) MCP endpoint,
+which KikoBooks does not offer yet.
 
 ## Setup
 
@@ -98,6 +105,33 @@ Add to `.vscode/mcp.json` in your project:
   }
 }
 ```
+
+### Claude Code
+
+```bash
+claude mcp add kikobooks \
+  -e KIKOBOOKS_BASE_URL=https://ai.kikobooks.com \
+  -e KIKOBOOKS_API_KEY=your_api_key_here \
+  -- npx -y @agentkiko/kikobooks-mcp-server@latest
+```
+
+### Cursor / Windsurf
+
+Add the same `mcpServers` block shown for Claude Desktop to `~/.cursor/mcp.json` (Cursor) or
+`~/.codeium/windsurf/mcp_config.json` (Windsurf).
+
+### Read-only mode
+
+Write, update, and delete tools load by default. To give an assistant analysis-only access, add these
+to the `env` block of any configuration above:
+
+```json
+"KIKOBOOKS_DISABLE_WRITE": "true",
+"KIKOBOOKS_DISABLE_UPDATE": "true",
+"KIKOBOOKS_DISABLE_DELETE": "true"
+```
+
+Only `get_*`, `search_*`, and `list_*` tools are registered in this mode.
 
 ### Local Development
 
@@ -269,7 +303,7 @@ For local development, point to the built output:
 | `get_income_by_category` | Income breakdown by category |
 | `get_business_health` | Composite business-health indicators |
 
-### Banking (read-only)
+### Banking & Reconciliation (read)
 | Tool | Description |
 |------|-------------|
 | `search_bank_accounts` | Search bank accounts with paging and filters |
@@ -279,7 +313,7 @@ For local development, point to the built output:
 | `search_reconciliation_sessions` | Search reconciliation sessions |
 | `get_reconciliation_summary` | Reconciliation summary across accounts |
 
-### Deposits, Fixed Assets, Recurring, Statements (read-only)
+### Deposits, Fixed Assets, Recurring, Statements (read)
 | Tool | Description |
 |------|-------------|
 | `search_deposits` / `get_deposit` | Bank deposits and allocated payments |
@@ -304,14 +338,22 @@ Mutating — require a read-write API key and are hidden when `KIKOBOOKS_DISABLE
 > templates that warrant dedicated design rather than a best-effort mapping.
 
 ### Scope tiers
-Read tools (`get_*`, `search_*`) always load. Mutating tools are grouped into
-scope tiers that can be suppressed at startup:
+Read tools (`get_*`, `search_*`, `list_*`) always load. Mutating tools load by default and are grouped
+into scope tiers that can be suppressed at startup (set the flag to `true` or `1`):
 
 | Env flag | Suppresses |
 |----------|------------|
-| `KIKOBOOKS_DISABLE_WRITE` | `create_*`, `post_*`, `reverse_*`, `move_*`, `promote_*`, `copy_*`, `generate_*` |
+| `KIKOBOOKS_DISABLE_WRITE` | `create_*`, `post_*`, `reverse_*`, `move_*`, `promote_*`, `copy_*`, `generate_*`, `send_*`, `approve_*`, `dispose_*`, `run_*`, `pause_*`, `resume_*`, `activate_*`, `start_*`, `complete_*`, `cancel_*`, `set_*` |
 | `KIKOBOOKS_DISABLE_UPDATE` | `update_*` |
 | `KIKOBOOKS_DISABLE_DELETE` | `delete_*`, `void_*` |
+
+## Security
+
+- The API key is exchanged for short-lived JWTs. It is never written to disk, logged, or returned to the model.
+- Every call goes through the same permission-checked KikoBooks API your team uses, scoped to the key's organization.
+- Posted ledger entries cannot be edited or deleted through any tool; corrections are reversals or credit memos.
+- MCP clients ask you to confirm tool calls before they run. Review each write before you approve it.
+- Report vulnerabilities to info@accountant.world with the subject "Security vulnerability report".
 
 ## Authentication
 
@@ -332,7 +374,7 @@ Set `KIKOBOOKS_ACCESS_TOKEN` (and optionally `KIKOBOOKS_REFRESH_TOKEN`) if you m
 | `KIKOBOOKS_ACCESS_TOKEN` | Alt* | Direct JWT access token |
 | `KIKOBOOKS_REFRESH_TOKEN` | No | JWT refresh token |
 | `KIKOBOOKS_TOKEN_STORE_PATH` | No | Absolute path to persist the rotated JWT between runs (API key is never written) |
-| `KIKOBOOKS_DISABLE_WRITE` | No | Suppress create/post/bridge tools |
+| `KIKOBOOKS_DISABLE_WRITE` | No | Suppress create/post/action and bridge tools |
 | `KIKOBOOKS_DISABLE_UPDATE` | No | Suppress update tools |
 | `KIKOBOOKS_DISABLE_DELETE` | No | Suppress delete/void tools |
 
@@ -379,8 +421,8 @@ src/
 See [ROADMAP.md](ROADMAP.md) for the full implementation plan:
 - **Phase 1** ✅ Core Bookkeeping (12 accounting entities)
 - **Phase 2** ✅ Practice Management (CRM, Proposals, Workflow) + lifecycle bridges
-- **Phase 3** Banking & Reconciliation
-- **Phase 4** Reports & Analytics
+- **Phase 3** ✅ Banking & Reconciliation
+- **Phase 4** ✅ Reports & Analytics
 
 ## License
 

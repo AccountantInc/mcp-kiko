@@ -1,14 +1,15 @@
 {
     "name": "@agentkiko/kikobooks-mcp-server",
-    "version": "0.2.6",
-    "description": "MCP server implementation for KikoBooks bookkeeping integration",
+    "version": "0.2.7",
+    "description": "Model Context Protocol server for KikoBooks and Accountant.World: 116 governed bookkeeping, reporting, banking, CRM, proposal, and workflow tools for Claude, Cursor, VS Code Copilot, and other MCP clients.",
     "license": "MIT",
     "author": "Advisor8 Inc (https://kikobooks.com)",
     "repository": {
         "type": "git",
         "url": "git+https://github.com/AccountantInc/mcp-kiko.git"
     },
-    "homepage": "https://github.com/AccountantInc/mcp-kiko#readme",
+    "homepage": "https://kikobooks.com/interface/mcp.html",
+    "keywords": ["mcp", "model-context-protocol", "mcp-server", "kikobooks", "accounting", "bookkeeping", "ai-agent", "claude", "cursor", "copilot", "general-ledger", "accounts-receivable", "accounts-payable"],
     "bugs": {
         "url": "https://github.com/AccountantInc/mcp-kiko/issues"
     },
