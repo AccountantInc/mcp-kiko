@@ -9,8 +9,8 @@ It gives AI agents the ability to search, create, update, and manage your accoun
 This is **your public/external MCP server** for third-party AI integrations.
 
 > **Status (shipped):** Public repo, MIT-licensed, published to npm as
-> **`@agentkiko/kikobooks-mcp-server`** (latest `0.2.1`) and installable via
-> `npx -y @agentkiko/kikobooks-mcp-server`. Production API base URL is
+> **`@agentkiko/kikobooks-mcp-server`** and installable via
+> `npx -y @agentkiko/kikobooks-mcp-server@latest`. Production API base URL is
 > **`https://ai.kikobooks.com`**. Phases 1 + 1.5 + read-only slices of Phases 2–4
 > are complete (116 tools); the remaining create-with-nested-template and per-transaction bank match/categorize tools are the forward roadmap.
 
