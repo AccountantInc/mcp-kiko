@@ -142,7 +142,7 @@ For local development, point to the built output:
   "servers": {
     "kikobooks": {
       "command": "node",
-      "args": ["C:/Apps/kikobooks-mcp-server/dist/index.js"],
+      "args": ["/absolute/path/to/mcp-kiko/dist/index.js"],
       "env": {
         "KIKOBOOKS_BASE_URL": "https://ai.kikobooks.com",
         "KIKOBOOKS_API_KEY": "your_api_key_here"
@@ -432,4 +432,4 @@ MIT — see [LICENSE](LICENSE)
 
 - [KikoBooks](https://kikobooks.com)
 - [MCP Protocol Specification](https://modelcontextprotocol.io/)
-- [Advisor8 Inc](https://advisor8.com)
+- [Accountant Inc.](https://www.agentkiko.com) — publisher of KikoBooks, Accountant.World, and Agent Kiko
