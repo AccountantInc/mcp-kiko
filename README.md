@@ -219,7 +219,7 @@ For local development, point to the built output:
 ### Bill Payments (Accounts Payable)
 | Tool | Description |
 |------|-------------|
-| `search_bill_payments` | Search bill payments with vendor.and date filters |
+| `search_bill_payments` | Search bill payments with vendor and date filters |
 | `get_bill_payment` | Get full bill payment details |
 | `create_bill_payment` | Create a new bill payment |
 | `void_bill_payment` | Void a bill payment (reverses accounting impact) |
