@@ -1,6 +1,6 @@
 {
     "name": "@agentkiko/kikobooks-mcp-server",
-    "version": "0.2.9",
+    "version": "0.2.10",
     "description": "Model Context Protocol server for KikoBooks and Accountant.World: 116 governed bookkeeping, reporting, banking, CRM, proposal, and workflow tools for Claude, Cursor, VS Code Copilot, and other MCP clients.",
     "license": "MIT",
     "author": "Accountant Inc. (https://kikobooks.com)",

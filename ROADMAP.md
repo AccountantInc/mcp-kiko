@@ -161,35 +161,6 @@ per-bank-transaction match/categorize/record-transfer tools. Their request bodie
 large nested templates (bill-to/ship-to/line arrays, cross-module matching) that warrant
 dedicated design rather than a best-effort mapping — omitted rather than faked.
 
-### Phase 2 — Banking & Reconciliation (planned)
-
-| Entity | Tools |
-|--------|-------|
-| **Bank Accounts** | `search_bank_accounts`, `get_bank_account` |
-| **Bank Transactions** | `search_bank_transactions`, `get_bank_transaction` |
-| **Reconciliation** | `get_reconciliation_status` |
-
-### Phase 3 — Reports & Analytics (planned)
-
-| Entity | Tools |
-|--------|-------|
-| **Profit & Loss** | `get_profit_and_loss` |
-| **Balance Sheet** | `get_balance_sheet` |
-| **Trial Balance** | `get_trial_balance` |
-| **AR Aging** | `get_ar_aging` |
-| **AP Aging** | `get_ap_aging` |
-| **Dashboard** | `get_insights_dashboard` |
-
-### Phase 4 — Advanced Features (planned)
-
-| Entity | Tools |
-|--------|-------|
-| **Deposits** | `search_deposits`, `create_deposit` |
-| **Fixed Assets** | `search_fixed_assets`, `get_fixed_asset` |
-| **Recurring Invoices** | `search_recurring_invoices` |
-| **Recurring Bills** | `search_recurring_bills` |
-| **Organization** | `get_organization_details` |
-
 ---
 
 ## Authentication Strategy

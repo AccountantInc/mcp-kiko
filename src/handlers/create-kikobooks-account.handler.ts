@@ -6,9 +6,18 @@ export async function createKikoBooksAccount(
     accountData: any
 ): Promise<ToolResponse<any>> {
     try {
+        const payload = {
+            ...accountData,
+            AccountType_Code:
+                accountData?.AccountType_Code ?? accountData?.accountTypeCode,
+            parent_GL_Account_Id:
+                accountData?.parent_GL_Account_Id ??
+                accountData?.Parent_GL_Account_Id ??
+                accountData?.parentGLAccountId,
+        };
         const response = await kikoBooksClient.post(
             "/api/GL/Accounts",
-            accountData
+            payload
         );
 
         return {

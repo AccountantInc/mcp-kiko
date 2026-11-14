@@ -1,5 +1,6 @@
 import { getConfig, type KikoBooksConfig } from "../config.js";
 import { TokenStore, type StoredTokens } from "./token-store.js";
+import { getPackageVersion } from "../helpers/get-package-version.js";
 
 /** Normalized API error thrown by the client on non-2xx responses. */
 export class KikoBooksApiError extends Error {
@@ -15,7 +16,7 @@ export class KikoBooksApiError extends Error {
 
 type QueryParams = Record<string, string | number | boolean | undefined | null>;
 
-const USER_AGENT = "kikobooks-mcp-server/0.2.0";
+const USER_AGENT = `kikobooks-mcp-server/${getPackageVersion()}`;
 /** Refresh slightly before true expiry to avoid 401 races. */
 const EXPIRY_SKEW_MS = 30_000;
 

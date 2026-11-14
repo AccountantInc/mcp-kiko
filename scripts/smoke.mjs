@@ -36,7 +36,7 @@ async function call(name, args = {}) {
     return text;
 }
 
-let connected = false;
+let connected;
 try {
     const status = await call("get_connection_status");
     console.log("get_connection_status:\n" + status);

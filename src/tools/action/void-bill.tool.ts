@@ -4,10 +4,14 @@ import { voidKikoBooksBill } from "../../handlers/void-kikobooks-bill.handler.js
 
 const toolSchema = z.object({
     bill_id: z.number().describe("The Bill ID to void"),
+    reason: z
+        .string()
+        .optional()
+        .describe("Reason for voiding the bill (defaults to 'Voided via MCP')"),
 });
 
 const toolHandler = async (args: any) => {
-    const response = await voidKikoBooksBill(args.bill_id);
+    const response = await voidKikoBooksBill(args.bill_id, args.reason);
 
     if (response.isError) {
         return {
